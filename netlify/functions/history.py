@@ -2,9 +2,8 @@
 import json
 import os
 
-# The Netlify build process makes files in the root directory accessible 
-# for reading during the function execution.
-HISTORY_FILE = 'twisterbot_v_history.jsonl' 
+# Get the history file path from the environment, defaulting to the static filename
+HISTORY_FILE = os.environ.get('HISTORY_FILE_PATH', 'twisterbot_v_history.jsonl') 
 
 def handler(event, context):
     """
@@ -18,7 +17,6 @@ def handler(event, context):
         if os.path.exists(HISTORY_FILE):
             with open(HISTORY_FILE, 'r', encoding='utf-8') as f:
                 for line in f:
-                    # Append each JSON object from the JSONL file
                     history.append(json.loads(line))
         
         return {

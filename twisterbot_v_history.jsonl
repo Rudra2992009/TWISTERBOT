@@ -1,0 +1,4 @@
+{"sender": "user", "message": "Hello Twisterbot V, what's your primary function?", "timestamp": "2025-10-29T10:00:00.123456", "app": "Twisterbot V"}
+{"sender": "ai", "message": "My primary function is to demonstrate a hybrid web application architecture, combining a client-side AI chat (Transformers.js) with a Flask Python backend for persistence. I save all our messages!", "timestamp": "2025-10-29T10:00:05.987654", "app": "Twisterbot V"}
+{"sender": "user", "message": "That's neat! How do you communicate with the backend?", "timestamp": "2025-10-29T10:01:30.456789", "app": "Twisterbot V"}
+{"sender": "ai", "message": "I use the dedicated JavaScript communication layer, commodity.js, which sends asynchronous HTTP requests (POST for saving, GET for fetching history) to the Flask API endpoints.", "timestamp": "2025-10-29T10:01:35.321098", "app": "Twisterbot V"}

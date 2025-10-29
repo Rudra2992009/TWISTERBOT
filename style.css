@@ -1,0 +1,191 @@
+/* style.css */
+
+/* Global Reset and Body Styling */
+:root {
+    --color-primary: #007bff;        /* Blue for branding/user messages */
+    --color-secondary: #f0f0f0;      /* Light background for AI messages */
+    --color-background: #ffffff;
+    --color-chat-border: #dddddd;
+    --color-text: #333333;
+    --color-system: #6c757d;         /* Gray for status messages */
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #e9ecef;
+    color: var(--color-text);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+/* Chat Container */
+#chat-container {
+    width: 100%;
+    max-width: 700px;
+    height: 90vh; /* Takes up most of the viewport height */
+    max-height: 800px;
+    background: var(--color-background);
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* Header */
+header {
+    padding: 15px 20px;
+    border-bottom: 1px solid var(--color-chat-border);
+    background-color: #f8f9fa;
+}
+
+header h2 {
+    font-size: 1.5em;
+    font-weight: 600;
+    color: var(--color-primary);
+    margin-bottom: 5px;
+}
+
+.version {
+    font-size: 0.7em;
+    color: var(--color-system);
+    font-weight: normal;
+}
+
+#status-message {
+    font-size: 0.9em;
+    color: var(--color-system);
+    transition: color 0.3s;
+}
+
+#status-message.loading { color: orange; }
+#status-message.ready { color: green; }
+#status-message.error { color: red; }
+
+/* Messages Area */
+#messages {
+    flex-grow: 1; /* Allows message area to take up available space */
+    padding: 15px 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px; /* Space between message rows */
+}
+
+/* Message Row Alignment */
+.message-row {
+    display: flex;
+    width: 100%;
+}
+
+.message-row.user {
+    justify-content: flex-end; /* Align user messages to the right */
+}
+
+.message-row.ai {
+    justify-content: flex-start; /* Align AI messages to the left */
+}
+
+/* Message Bubble Styling */
+.message-bubble {
+    max-width: 80%;
+    padding: 10px 15px;
+    border-radius: 18px;
+    font-size: 0.95em;
+    line-height: 1.4;
+    word-wrap: break-word;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.message-bubble.user {
+    background-color: var(--color-primary);
+    color: white;
+    /* Rounded corners adjustment for alignment */
+    border-bottom-right-radius: 4px;
+}
+
+.message-bubble.ai {
+    background-color: var(--color-secondary);
+    color: var(--color-text);
+    /* Rounded corners adjustment for alignment */
+    border-bottom-left-radius: 4px;
+}
+
+/* Input Area */
+#input-area {
+    display: flex;
+    padding: 15px 20px;
+    border-top: 1px solid var(--color-chat-border);
+    background-color: #f8f9fa;
+}
+
+#user-input {
+    flex-grow: 1;
+    padding: 12px;
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    font-size: 1em;
+    margin-right: 10px;
+    transition: border-color 0.3s;
+}
+
+#user-input:focus {
+    border-color: var(--color-primary);
+    outline: none;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+#send-btn {
+    padding: 12px 25px;
+    background-color: var(--color-primary);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1em;
+    font-weight: 600;
+    transition: background-color 0.2s, opacity 0.2s;
+}
+
+#send-btn:hover:not(:disabled) {
+    background-color: #0056b3;
+}
+
+#send-btn:disabled {
+    background-color: #a0c3e6;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+/* Specific Styles for AI Thinking State (optional but professional) */
+.message-bubble.thinking {
+    font-style: italic;
+    color: var(--color-system);
+    background-color: #e9ecef;
+}
+
+/* Responsive Design (for smaller screens) */
+@media (max-width: 768px) {
+    #chat-container {
+        height: 100vh;
+        border-radius: 0;
+        max-height: initial;
+    }
+    body {
+        min-height: initial;
+    }
+    #input-area {
+        padding: 10px 15px;
+    }
+    #user-input, #send-btn {
+        padding: 10px;
+    }
+}

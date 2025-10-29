@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Twisterbot V: Client-Side AI Chat</title>
+    <link rel="stylesheet" href="style.css"> 
+    
+    <script type="module" src="https://cdn.jsdelivr.net/npm/@huggingface/transformers@2.9.0/dist/transformers.min.js"></script>
+</head>
+<body>
+    <div id="chat-container">
+        <header>
+            <h2>Twisterbot V - Client-Side AI</h2>
+        </header>
+        <div id="messages">
+            </div>
+        <div id="input-area">
+            <input type="text" id="user-input" placeholder="Ask Twisterbot V...">
+            <button id="send-btn">Send</button>
+        </div>
+        <p id="status-message">Loading model...</p>
+    </div>
+
+    <script type="module">
+        // Import AI pipeline from CDN
+        import { pipeline } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@2.9.0';
+        
+        // **IMPORTING LOCAL COMMUNICATION LAYER (commodity.js)**
+        // Use './' for a file in the same directory.
+        import { saveTwisterbotMessage, fetchTwisterbotHistory } from './commodity.js'; 
+
+        const statusMessage = document.getElementById('status-message');
+        const userInput = document.getElementById('user-input');
+        const sendBtn = document.getElementById('send-btn');
+        const messagesDiv = document.getElementById('messages');
+        let chatPipeline = null;
+        
+        // ... (appendMessage function - use approporiate CSS classes: .user and .ai) ...
+
+        async function initializeModel() {
+            try {
+                // ... (Model loading logic, same as before) ...
+                
+                // Fetch and display history upon startup
+                const history = await fetchTwisterbotHistory();
+                history.forEach(msg => appendMessage(msg.sender, msg.message));
+                
+                statusMessage.textContent = "Twisterbot V is ready!";
+                userInput.disabled = false;
+                sendBtn.disabled = false;
+
+            } catch (error) {
+                console.error("Model Loading Error:", error);
+                statusMessage.textContent = "Error loading model. Check console.";
+            }
+        }
+        
+        async function handleUserInput() {
+            const userText = userInput.value.trim();
+            if (!userText || !chatPipeline) return;
+
+            // 1. UI Update & Input Clear
+            appendMessage('user', userText);
+            userInput.value = ''; 
+
+            // 2. AI Inference
+            appendMessage('ai', 'Twisterbot V is thinking...');
+            try {
+                // Using 'question-answering' as the client-side demo task
+                const context = "Twisterbot V is an expert in client-side ML and web development integration.";
+                const result = await chatPipeline(userText, context);
+                const aiResponse = result.answer || "I processed your request, but the model did not find a conclusive answer from the context.";
+                
+                // Update the 'thinking' message with the final response
+                messagesDiv.lastElementChild.textContent = aiResponse;
+
+                // 3. Persistence (Using commodity.js)
+                await saveTwisterbotMessage({ sender: 'user', message: userText });
+                await saveTwisterbotMessage({ sender: 'ai', message: aiResponse });
+
+            } catch (error) {
+                console.error("Twisterbot Inference Error:", error);
+                messagesDiv.lastElementChild.textContent = 'Twisterbot V Error: Could not generate response.';
+            }
+        }
+
+        // Event Listeners (same as before)
+        sendBtn.addEventListener('click', handleUserInput);
+        userInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleUserInput();
+        });
+
+        // Start
+        initializeModel();
+    </script>
+</body>
+</html>

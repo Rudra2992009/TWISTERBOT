@@ -1,6 +1,10 @@
 # TWISTERBOT/netlify/functions/save_message.py
 import json
+import os
 from datetime import datetime
+
+# Get the history file path from the environment, defaulting to the static filename
+HISTORY_FILE = os.environ.get('HISTORY_FILE_PATH', 'twisterbot_v_history.jsonl') 
 
 def handler(event, context):
     """
@@ -11,7 +15,6 @@ def handler(event, context):
     logic with a call to a dedicated database (e.g., FaunaDB, DynamoDB).
     """
     
-    # 1. Check for POST method
     if event['httpMethod'] != 'POST':
         return {'statusCode': 405, 'body': json.dumps({'error': 'Method Not Allowed'})}
     
@@ -21,7 +24,6 @@ def handler(event, context):
         if not all(k in data for k in ['sender', 'message']):
             return {'statusCode': 400, 'body': json.dumps({'error': 'Invalid payload. Requires sender and message.'})}
 
-        # 2. Prepare and log the entry (Simulated save)
         history_entry = {
             'sender': data['sender'],
             'message': data['message'],
@@ -31,11 +33,9 @@ def handler(event, context):
 
         print(f"Simulated save (requires DB for persistence): {history_entry['sender']} - {history_entry['message']}")
         
-        # 3. Return success response
         return {
             'statusCode': 201,
             'body': json.dumps({'status': 'success', 'saved': True, 'warning': 'Persistence is simulated.'}),
-            # Crucial for CORS and Netlify
             'headers': { 'Access-Control-Allow-Origin': '*' }
         }
 

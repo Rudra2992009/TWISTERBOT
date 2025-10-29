@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Twisterbot V: Client-Side AI Chat</title>
     <link rel="stylesheet" href="style.css"> 
     
@@ -10,48 +11,71 @@
 <body>
     <div id="chat-container">
         <header>
-            <h2>Twisterbot V - Client-Side AI</h2>
+            <h2>Twisterbot V <span class="version">v1.0</span></h2>
+            <p id="status-message" class="loading">Loading model...</p>
         </header>
+        
         <div id="messages">
             </div>
+        
         <div id="input-area">
-            <input type="text" id="user-input" placeholder="Ask Twisterbot V...">
-            <button id="send-btn">Send</button>
+            <input type="text" id="user-input" placeholder="Ask Twisterbot V..." disabled>
+            <button id="send-btn" disabled>Send</button>
         </div>
-        <p id="status-message">Loading model...</p>
     </div>
 
     <script type="module">
-        // Import AI pipeline from CDN
+        // --- Imports ---
         import { pipeline } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@2.9.0';
-        
-        // **IMPORTING LOCAL COMMUNICATION LAYER (commodity.js)**
-        // Use './' for a file in the same directory.
-        import { saveTwisterbotMessage, fetchTwisterbotHistory } from './commodity.js'; 
+        import { saveTwisterbotMessage, fetchTwisterbotHistory } from './commodity.js'; // Local import
 
+        // --- DOM Elements ---
         const statusMessage = document.getElementById('status-message');
         const userInput = document.getElementById('user-input');
         const sendBtn = document.getElementById('send-btn');
         const messagesDiv = document.getElementById('messages');
         let chatPipeline = null;
-        
-        // ... (appendMessage function - use approporiate CSS classes: .user and .ai) ...
+
+        // --- Utility Functions ---
+        function appendMessage(sender, text) {
+            const msgContainer = document.createElement('div');
+            msgContainer.className = `message-row ${sender}`;
+            
+            const msgBubble = document.createElement('div');
+            msgBubble.className = `message-bubble ${sender}`;
+            msgBubble.textContent = text;
+
+            msgContainer.appendChild(msgBubble);
+            messagesDiv.appendChild(msgContainer);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight; // Auto-scroll
+            return msgBubble;
+        }
 
         async function initializeModel() {
             try {
-                // ... (Model loading logic, same as before) ...
+                // 1. Load AI Model
+                statusMessage.textContent = "Loading client-side NLP model...";
+                statusMessage.classList.add('loading');
+                // Use a minimal model for QA as discussed. This may take time depending on network/model size.
+                chatPipeline = await pipeline('question-answering', 'Xenova/distilbert-base-uncased-distilled-squad'); 
                 
-                // Fetch and display history upon startup
+                // 2. Load History from Python Backend (using commodity.js)
                 const history = await fetchTwisterbotHistory();
                 history.forEach(msg => appendMessage(msg.sender, msg.message));
                 
-                statusMessage.textContent = "Twisterbot V is ready!";
+                // 3. Ready State
+                statusMessage.textContent = "Twisterbot V is ready. Ask a question!";
+                statusMessage.classList.remove('loading');
+                statusMessage.classList.add('ready');
                 userInput.disabled = false;
                 sendBtn.disabled = false;
+                userInput.focus();
 
             } catch (error) {
-                console.error("Model Loading Error:", error);
-                statusMessage.textContent = "Error loading model. Check console.";
+                console.error("Initialization Error:", error);
+                statusMessage.textContent = "ERROR: Model failed to load. Check browser console.";
+                statusMessage.classList.remove('loading');
+                statusMessage.classList.add('error');
             }
         }
         
@@ -59,38 +83,48 @@
             const userText = userInput.value.trim();
             if (!userText || !chatPipeline) return;
 
-            // 1. UI Update & Input Clear
+            // 1. Display User Message
             appendMessage('user', userText);
             userInput.value = ''; 
+            userInput.disabled = true;
+            sendBtn.disabled = true;
 
-            // 2. AI Inference
-            appendMessage('ai', 'Twisterbot V is thinking...');
+            // 2. Placeholder for AI Thinking
+            const aiThinkingBubble = appendMessage('ai', 'AI is thinking...');
+            aiThinkingBubble.classList.add('thinking');
+
             try {
-                // Using 'question-answering' as the client-side demo task
-                const context = "Twisterbot V is an expert in client-side ML and web development integration.";
+                // 3. AI Inference (Client-Side)
+                const context = "Twisterbot V is a helpful AI specializing in web development, Python, and client-side ML integration (Transformers.js, Flask).";
                 const result = await chatPipeline(userText, context);
-                const aiResponse = result.answer || "I processed your request, but the model did not find a conclusive answer from the context.";
+                const aiResponse = result.answer || "I processed your request, but the model could not provide a detailed answer from the limited context.";
                 
-                // Update the 'thinking' message with the final response
-                messagesDiv.lastElementChild.textContent = aiResponse;
+                // 4. Update UI with Response
+                aiThinkingBubble.textContent = aiResponse;
+                aiThinkingBubble.classList.remove('thinking');
 
-                // 3. Persistence (Using commodity.js)
+                // 5. Persistence (Via commodity.js to Python Backend)
                 await saveTwisterbotMessage({ sender: 'user', message: userText });
                 await saveTwisterbotMessage({ sender: 'ai', message: aiResponse });
 
             } catch (error) {
                 console.error("Twisterbot Inference Error:", error);
-                messagesDiv.lastElementChild.textContent = 'Twisterbot V Error: Could not generate response.';
+                aiThinkingBubble.textContent = 'Twisterbot V Error: Failed to generate response.';
+                aiThinkingBubble.classList.remove('thinking');
+            } finally {
+                userInput.disabled = false;
+                sendBtn.disabled = false;
+                userInput.focus();
             }
         }
 
-        // Event Listeners (same as before)
+        // --- Event Listeners ---
         sendBtn.addEventListener('click', handleUserInput);
         userInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') handleUserInput();
         });
 
-        // Start
+        // Start the application
         initializeModel();
     </script>
 </body>

@@ -1,0 +1,10 @@
+[build]
+  # The directory containing your static files (index.html, style.css, etc.)
+  publish = "TWISTERBOT"  
+  # The directory where Netlify will look for your Python functions
+  functions = "netlify/functions"
+
+# Configuration for the Python functions runtime
+[functions]
+  # Specifies the runtime environment for your Python functions
+  python_runtime = "python3.9" 
